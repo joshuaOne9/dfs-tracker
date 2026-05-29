@@ -8,9 +8,7 @@ function App() {
     <div className="min-h-screen bg-slate-900 text-white">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">DFS Tracker</h1>
-          <p className="text-emerald-400 text-2xl">GREEN TEST</p>
-          <p className="text-red-400 text-2xl">RED TEST</p>
-
+        
         <ContestForm onAdd={addContest} />
 
         <div className="mt-8">
