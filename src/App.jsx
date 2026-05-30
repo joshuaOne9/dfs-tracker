@@ -1,5 +1,6 @@
 import ContestForm from "./components/ContestForm";
 import { useContests } from "./hooks/useContests";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   const { contests, addContest, deleteContest } = useContests();
@@ -9,6 +10,8 @@ function App() {
       <div className="max-w-3xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">DFS Tracker</h1>
         
+        <Dashboard contests={contests} />
+
         <ContestForm onAdd={addContest} />
 
         <div className="mt-8">
