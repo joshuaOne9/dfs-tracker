@@ -33,11 +33,11 @@ export default function ContestForm({ onAdd }) {
       }
 
     const input =
-      "w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text white focus:border-emerald-500 focus:outline-none";
+      "w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:border-emerald-500 focus:outline-none";
     const label = "block text-sm font-medium text-slate-300 mb-1";
     
     return (
-      <form onSubmit={handleSubmit} className="bg-slate-800/50 rounded-x1 p-6 space-y-4">
+      <form onSubmit={handleSubmit} className="bg-slate-800/50 rounded-xl p-6 space-y-4">
        <h2 className="text-xl font-bold mb-2">Log a Contest</h2>
 
        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -87,7 +87,7 @@ export default function ContestForm({ onAdd }) {
            <textarea name="notes" value={form.notes} onChange={handleChange} rows="2" className={input} placeholder="Stack notes, late swap, etc." />
        </div>
 
-       <button type="submit" className="w-full bg-emeral-600 hover:bg-emerald-500 font-semibold py-2.5 rounded-lg transition-colors">
+       <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 font-semibold py-2.5 rounded-lg transition-colors">
          Add Contest
        </button>
       </form>

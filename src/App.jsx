@@ -1,15 +1,34 @@
 import ContestForm from "./components/ContestForm";
 import { useContests } from "./hooks/useContests";
 import Dashboard from "./components/Dashboard";
+import { useAuth } from "./hooks/useAuth";
+import Auth from "./components/Auth";
 
 function App() {
-  const { contests, addContest, deleteContest } = useContests();
+  // --- hooks first, always, before any return ---
+  const { session, loading, signIn, signUp, signOut } = useAuth();
+  const { contests, addContest, deleteContest } = useContests(session);
 
+  // --- auth gating ---
+  if (loading) {
+    return <div className="min-h-screen grid place-items-center bg-gray-900 text-white">Loading…</div>;
+  }
+
+  if (!session) {
+    return <Auth onSignIn={signIn} onSignUp={signUp} />;
+  }
+
+  // --- logged-in app UI ---
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">DFS Tracker</h1>
-        
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">DFS Tracker</h1>
+          <button onClick={signOut} className="text-sm text-slate-400 hover:text-white">
+            Sign out
+          </button>
+        </div>
+
         <Dashboard contests={contests} />
 
         <ContestForm onAdd={addContest} />

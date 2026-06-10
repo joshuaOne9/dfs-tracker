@@ -1,35 +1,76 @@
 import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
 
-const STORAGE_KEY = "dfs-tracker-contests";
+// DB row (snake_case) -> JS contest (camelCase)
+const fromRow = (row) => ({
+  id: row.id,
+  date: row.played_on,
+  sport: row.sport,
+  site: row.site,
+  slateType: row.slate_type,
+  contestType: row.contest_type,
+  entryFee: Number(row.entry_fee),
+  payout: Number(row.payout),
+  lineup: row.lineup,
+  stackType: row.stack_type,
+  notes: row.notes,
+});
 
-export function useContests() {
-    const [contests, setContests] = useState(() => {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            return saved ? JSON.parse(saved) : [];
-        } catch {
-          return [];
-        }
-      });
+// JS contest (camelCase) -> DB row (snake_case) for insert
+const toRow = (c) => ({
+  played_on: c.date,
+  sport: c.sport,
+  site: c.site,
+  slate_type: c.slateType ?? null,
+  contest_type: c.contestType,
+  entry_fee: Number(c.entryFee),
+  payout: Number(c.payout),
+  lineup: c.lineup ?? null,
+  stack_type: c.stackType ?? null,
+  notes: c.notes ?? null,
+});
 
-      useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(contests));
-      }, [contests]);
+export function useContests(session) {
+  const [contests, setContests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-      function addContest(contest) {
-        const newContest = {
-          ...contest,
-          id: crypto.randomUUID(),
-          createdAt: Date.now(),
-          lineup: [],        // for player exposure feature later
-          stackType: null,   // for your stack-tracking wedge later
-        };
-        setContests((prev) => [newContest, ...prev]);
-      }
-
-      function deleteContest(id) {
-        setContests((prev) => prev.filter((c) => c.id !== id));
-      }
-
-      return { contests, addContest, deleteContest };
+  // Fetch this user's contests whenever the session changes
+  useEffect(() => {
+    if (!session) {
+      setContests([]);
+      setLoading(false);
+      return;
     }
+    let active = true;
+    setLoading(true);
+    supabase
+      .from("contests")
+      .select("*")
+      .order("played_on", { ascending: false })
+      .then(({ data, error }) => {
+        if (!active) return;
+        if (error) console.error("Failed to load contests:", error.message);
+        else setContests(data.map(fromRow));
+        setLoading(false);
+      });
+    return () => { active = false; };
+  }, [session]);
+
+  const addContest = async (contest) => {
+    const { data, error } = await supabase
+      .from("contests")
+      .insert(toRow(contest))
+      .select()
+      .single();
+    if (error) return console.error("Failed to add contest:", error.message);
+    setContests((prev) => [fromRow(data), ...prev]);
+  };
+
+  const deleteContest = async (id) => {
+    const { error } = await supabase.from("contests").delete().eq("id", id);
+    if (error) return console.error("Failed to delete contest:", error.message);
+    setContests((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  return { contests, addContest, deleteContest, loading };
+}
